@@ -21,7 +21,7 @@ describe("Borrowing Power Calculator Tests", () => {
     assert.strictEqual(result.monthlyRepayment, 4600);
   });
 
-  it("should return 0 for invalid negative inputs", async () => {
+  it("should return 0 for low income", async () => {
     const calculator = new BorrowingCalculator();
     const result = await calculator.calculateBorrowingPower(
       30000,
@@ -31,5 +31,19 @@ describe("Borrowing Power Calculator Tests", () => {
     );
     assert.strictEqual(result.maxLoanAmount, 0);
     assert.strictEqual(result.monthlyRepayment, 0);
+  });
+
+  it("should throw an error for invalid negative income", async () => {
+    const calculator = new BorrowingCalculator();
+    await assert.rejects(
+      calculator.calculateBorrowingPower(-30000, 3, 4000, 5000)
+    );
+  });
+
+  it("should throw an error for invalid negative dependents", async () => {
+    const calculator = new BorrowingCalculator();
+    await assert.rejects(
+      calculator.calculateBorrowingPower(30000, -3, 4000, 5000)
+    );
   });
 });
