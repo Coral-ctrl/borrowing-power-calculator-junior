@@ -14,8 +14,8 @@ class BorrowingCalculator {
     loanTermMonths = 360, // 30 Years
     interestRate = 7.0, // 7.0% baseline interest rate
     assessmentRateBuffer = 3.0, // 3.0% buffer added to interest rates
-    apiToken = "pat_abcdefghijklmnopqrstuvwxyz0123456789",
-    apiBaseUrl = "http://localhost:3000",
+    apiToken = "pat_abcdefghijklmnopqrstuvwxyz0123456789", // dev PAT, see server.md
+    apiBaseUrl = "http://localhost:3000", // local dev API
   } = {}) {
     this.loanTermMonths = loanTermMonths;
     this.interestRate = interestRate;
@@ -24,6 +24,7 @@ class BorrowingCalculator {
     this.apiBaseUrl = apiBaseUrl;
   }
 
+  // Fetches the annual tax owed for this income from the dev API.
   async getTax(income) {
     const response = await fetch(
       `${this.apiBaseUrl}/api/tax?income=${income}`,
@@ -42,6 +43,7 @@ class BorrowingCalculator {
     return data.tax;
   }
 
+  // Fetches the standardised HEM for this income/dependents.
   async getHEM(income, dependents) {
     const response = await fetch(
       `${this.apiBaseUrl}/api/hem?income=${income}&dependents=${dependents}`,
