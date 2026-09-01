@@ -1,76 +1,106 @@
 # Borrowing Power Calculator
 
-Hello and thanks so much for taking the time to do the Ferocia Junior Engineering Code Exercise.
+A simple mortgage borrowing-power calculator built as a Node.js CLI. Given an
+applicant's income, dependents, expenses, and credit card limits, it estimates
+the maximum they could borrow and the monthly repayment, using live tax and
+HEM (Household Expenditure Measure) data pulled from a provided dev API.
 
-This borrowing power calculator written in Javascript was started by one of our juniors, Gen (her full name is “Gen A. Eye”), but she she went on leave before she could finish it…
-
-We need you to progress the code in her absence. Once you’ve submitted your work and we’ve reviewed it, you’ll sit down and explain the code to Gens team members (our interviewers) in a pairing session.
-
-Keep in mind that we’ll expect you to be able to explain and expand on the code you submit.
-
-If you haven’t done much Javascript before don’t worry. We’ll take your experience into account, just give it your best shot. 
-
-You can see our online borrowing power calculator (Gens project is simplified so dont expect the number to match perfectly) to see how it work (https://www.bendigobank.com.au/personal/loans/calculators/borrowing-power/).
-
-## Please try to complete the following:
-
-### Replace the two placeholder functions
-The code needs to calculate tax on income and a HEM (Household Expense Measure) value.
-Currently this is performed by placeholder code in the following functions:
-    getTax(income)
-    getHEM(income, dependents)
-You will need to replace the code in both with API calls.
-We have provided a server.js which can you run locally to expose the following 2 development endpoints:
-    http://localhost:3000/api/tax?income=[income]
-    http://localhost:3000/api/hem?income=[income]&dependents=[dependents]
-Both return JSON and require an authentication header with a valid PAT (Personal Access Token), see server.md for full documentation including the development PAT.
-
-### Make it manageable
-Gen planned to pull all the calculator functions into a class so she could extend it later, but we’ll leave it up to you to choose the approach (a well-formed class, an orchestrator function, a factory/closure pattern, or whatever)
-
-### Test coverage
-Of course we’ll need the test suite to pass and have full coverage.
-
-
-
-## Rules:
-
-Use whatever tools and resources help you get the job done. That includes AI, documentation, Stack Overflow, or anything else. What matters is that you understand every line you submit. In the follow-up pairing session, we'll ask you to walk us through your code, explain your decisions, and make changes on the fly - without an AI in Agent mode. If you can't do that confidently, it will count against you. The goal isn't to catch you out, it's to understand how you think.
+This started as an incomplete prototype (placeholder tax/HEM math, no
+structure) and was completed as a take-home exercise: wiring the two
+placeholder functions to a real API, restructuring into a class, and adding
+test coverage.
 
 ## Setup
 
-Make sure you have Node.js installed.
+Requires Node.js installed.
 
-Install dependencies:
-```
+```bash
 npm install
 ```
 
-## Server
+## Running the API
 
-You wil need to run the development API in it's own terminal window.
-(The server will be available at http://localhost:3000/).
-To start the server run the following command:
-```
+The calculator depends on a local dev API for tax and HEM data. Start it in
+its own terminal, and leave it running:
+
+```bash
 npm run api
 ```
-Note: You can stop the server with Ctrl+C
 
+Available at `http://localhost:3000/`. Two endpoints, both requiring an
+`Authorization: Bearer <token>` header (dev token:
+`pat_abcdefghijklmnopqrstuvwxyz0123456789`):
 
-## Running
+- `GET /api/tax?income=<income>` → `{ "income": 125000, "tax": 25750 }`
+- `GET /api/hem?income=<income>&dependents=<dependents>` → `{ "income": 125000, "dependents": 2, "hem": 3100 }`
 
-Run the calculator with:
-```
+Missing/invalid token returns `401`; a missing or negative parameter returns
+`400`.
+
+## Running the calculator
+
+In a separate terminal, with the API running:
+
+```bash
 npm start
 ```
 
+Answers four prompts (income, dependents, expenses, credit card limits) and
+prints the estimated maximum borrowing power and monthly repayment.
 
 ## Testing
 
-Run tests with:
-```
+```bash
 npm test
 ```
 
+**Note:** the test suite calls the real API (no mocking), so `npm run api`
+must be running in another terminal first, or the tests will fail with
+`ECONNREFUSED`.
 
+To check coverage:
 
+```bash
+npm run coverage
+```
+
+Current coverage: **78.89% statements / 94.73% branch**. The gap is
+`runConsoleMode()`, the function that
+runs the interactive terminal prompts — asking for income, dependents,
+expenses, and credit limit. Since that function reads real keyboard
+input, it's excluded from automated tests, so I tested it by hand
+instead: running the calculator myself multiple times with different
+numbers and checking the results matched what I'd worked out separately
+by hand.
+
+## Design decisions, assumptions & tradeoffs
+
+**Structure — a class.** I grouped the calculator's settings — loan
+length, interest rate, the extra safety buffer, the API login details —
+into one place, set when you create a calculator, with sensible
+defaults built in. The numbers that change every time someone uses
+it — their income, dependents, expenses, credit limit — stay as things
+you pass in each time you ask for a result, since those belong to the
+person asking, not to the calculator itself. I also moved the "add a
+safety buffer to the interest rate" rule inside the calculator itself,
+instead of making whoever calls it work that out — so that rule only
+exists in one place, not scattered around.
+
+**Error handling — deliberately minimal.** If the API call fails (server
+down, or it returns an error), the program just crashes and shows a
+raw technical error message instead of something friendly. This was a
+conscious choice to keep the scope small rather than an
+oversight — I traced through what a friendlier version (`try`/`catch`
+around the CLI's calculation step) would look like, but decided it
+wasn't essential for what this exercise is testing.
+
+**Verification against a real calculator.** I compared output against
+Bendigo Bank's [Home Loan Borrowing Power calculator](https://www.bendigobank.com.au/personal/home-loans/calculators/borrowing-power/)
+using matching inputs (income $120,000, 2 dependents, $3,000/month
+expenses, $10,000 credit limit): mine gave $524,173.77 at 10% (7% base +
+3% assessment buffer) over 30 years; Bendigo's real product gave
+$467,000 at their actual 6.14% rate. The ~12% gap is expected, not a
+bug — this exercise's tax and HEM data (`server.js`) is simplified,
+fictional data, not real ATO tax brackets or a real HEM benchmark, and
+the assessment rate here is a simplified fixed buffer rather than real
+lending policy.
