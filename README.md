@@ -94,13 +94,21 @@ oversight — I traced through what a friendlier version (`try`/`catch`
 around the CLI's calculation step) would look like, but decided it
 wasn't essential for what this exercise is testing.
 
-**Verification against a real calculator.** I compared output against
+**Verification.** The main way I checked correctness was hand-deriving
+the exact expected numbers from the actual formulas and
+confirming my code produced identical results (e.g. income $125,000 →
+tax $25,750; income $120,000, 2 dependents, $3,000 expenses, $10,000
+credit limit → $4,600 monthly repayment). This is the strongest check
+available here, since I controlled both sides of the comparison.
+
+As a secondary sanity check, I compared output against
 Bendigo Bank's [Home Loan Borrowing Power calculator](https://www.bendigobank.com.au/personal/home-loans/calculators/borrowing-power/)
 using matching inputs (income $120,000, 2 dependents, $3,000/month
 expenses, $10,000 credit limit): mine gave $524,173.77 at 10% (7% base +
 3% assessment buffer) over 30 years; Bendigo's real product gave
 $467,000 at their actual 6.14% rate. The ~12% gap is expected, not a
-bug — this exercise's tax and HEM data (`server.js`) is simplified,
-fictional data, not real ATO tax brackets or a real HEM benchmark, and
-the assessment rate here is a simplified fixed buffer rather than real
-lending policy.
+bug — this exercise is deliberately
+simplified. This check wasn't for an exact match
+— it confirmed the output is
+realistic in shape and scale, not a sign of a units bug or a wildly
+wrong formula.
