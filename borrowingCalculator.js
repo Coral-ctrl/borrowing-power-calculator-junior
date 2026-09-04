@@ -122,26 +122,30 @@ function runConsoleMode() {
     rl.question("Number of Dependents: ", (dependents) => {
       rl.question("Declared Monthly Expenses: $", (expenses) => {
         rl.question("Total Credit Card Limits: $", async (creditLimits) => {
-          const result = await calculator.calculateBorrowingPower(
-            parseFloat(income),
-            parseInt(dependents),
-            parseFloat(expenses),
-            parseFloat(creditLimits)
-          );
+          try {
+            const result = await calculator.calculateBorrowingPower(
+              parseFloat(income),
+              parseInt(dependents),
+              parseFloat(expenses),
+              parseFloat(creditLimits)
+            );
 
-          console.log("\n--- Calculation Summary ---");
-          console.log(
-            `Maximum Borrowing Power at ${
-              calculator.interestRate
-            }%: $${result.maxLoanAmount.toLocaleString()}`
-          );
-          console.log(
-            `Assumed Monthly Mortgage Repayment: $${result.monthlyRepayment.toLocaleString()} over ${
-              calculator.loanTermMonths / 12
-            } years`
-          );
-
-          rl.close();
+            console.log("\n--- Calculation Summary ---");
+            console.log(
+              `Maximum Borrowing Power at ${
+                calculator.interestRate
+              }%: $${result.maxLoanAmount.toLocaleString()}`
+            );
+            console.log(
+              `Assumed Monthly Mortgage Repayment: $${result.monthlyRepayment.toLocaleString()} over ${
+                calculator.loanTermMonths / 12
+              } years`
+            );
+          } catch (err) {
+            console.log(`\nSorry, something went wrong: ${err.message}`);
+          } finally {
+            rl.close();
+          }
         });
       });
     });

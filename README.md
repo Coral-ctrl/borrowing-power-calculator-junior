@@ -64,7 +64,7 @@ To check coverage:
 npm run coverage
 ```
 
-Current coverage: **72.9% statements / 93.33% branch**. The gap is
+Current coverage: **71.06% statements / 93.33% branch**. The gap is
 `runConsoleMode()`, the function that
 runs the interactive terminal prompts — asking for income, dependents,
 expenses, and credit limit. Since that function reads real keyboard
@@ -86,13 +86,14 @@ safety buffer to the interest rate" rule inside the calculator itself,
 instead of making whoever calls it work that out — so that rule only
 exists in one place, not scattered around.
 
-**Error handling — deliberately minimal.** If the API call fails (server
-down, or it returns an error), the program just crashes and shows a
-raw technical error message instead of something friendly. This was a
-conscious choice to keep the scope small rather than an
-oversight — I traced through what a friendlier version (`try`/`catch`
-around the CLI's calculation step) would look like, but decided it
-wasn't essential for what this exercise is testing.
+**Error handling.** A failed API call is caught in the CLI flow and shown as a short message
+instead of a raw stack trace — e.g. "Sorry, something went wrong:
+Request failed: 400". I kept the message itself simple (just the
+underlying error text) rather than writing scenario-specific hints,
+since a single hint like "check the server is running" would be wrong
+advice for a validation failure rather than a network one, and
+distinguishing the two cleanly would need a bit more logic than felt
+worth it here.
 
 **Verification.** The main way I checked correctness was hand-deriving
 the exact expected numbers from the actual formulas and
