@@ -24,6 +24,11 @@ class BorrowingCalculator {
     this.apiBaseUrl = apiBaseUrl;
   }
 
+  // Banks assess loans using base rate + buffer for safety
+  get annualAssessmentRate() {
+    return this.interestRate + this.assessmentRateBuffer;
+  }
+
   // Fetches the annual tax owed for this income from the dev API.
   async getTax(income) {
     const response = await fetch(
@@ -66,8 +71,6 @@ class BorrowingCalculator {
    * Calculates the total borrowing power amount and the monthly repayment configuration
    */
   async calculateBorrowingPower(income, dependents, expenses, creditLimits) {
-    // Banks assess loans using base rate + buffer for safety
-    const annualAssessmentRate = this.interestRate + this.assessmentRateBuffer;
     // 1. Calculate Net Monthly Income after tax deductions
     const annualTax = await this.getTax(income);
     const netMonthlyIncome = (income - annualTax) / 12;
@@ -89,7 +92,7 @@ class BorrowingCalculator {
     }
 
     // 5. Calculate the monthly interest rate
-    const monthlyRate = annualAssessmentRate / 100 / 12;
+    const monthlyRate = this.annualAssessmentRate / 100 / 12;
 
     // 6. Calculate maximum borrowing power using the following formula:
     // P = M * (1 - (1 + R)^-N) / R

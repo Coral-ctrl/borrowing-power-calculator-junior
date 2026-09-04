@@ -64,7 +64,7 @@ To check coverage:
 npm run coverage
 ```
 
-Current coverage: **78.89% statements / 94.73% branch**. The gap is
+Current coverage: **72.9% statements / 93.33% branch**. The gap is
 `runConsoleMode()`, the function that
 runs the interactive terminal prompts — asking for income, dependents,
 expenses, and credit limit. Since that function reads real keyboard
